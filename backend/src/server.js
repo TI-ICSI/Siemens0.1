@@ -2,7 +2,7 @@ import express from "express";
 import { ENV } from "./config/env.js";
 import {db} from './config/db.js'
 import {inventarioGeneral, equiposInventario} from "./db/schema.js"
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 const app = express();
 const PORT = ENV.PORT || 5001 ;
@@ -38,6 +38,24 @@ app.post("/api/inventarioGeneral", async (req, res) =>{
         res.status(500).json({error:"Busca el error"});
     }
 })
+
+//ELIMINA UN INVENTARIO GENERAL
+app.delete("/api/inventarioGeneral/:id" , async (req,res) =>{
+    try{
+        const { id } = req.params;
+        await db
+        .delete(inventarioGeneral)
+        .where(
+            and(eq(inventarioGeneral.id, id))
+        );
+
+        res.status(200).json({ message: "Inventario Eliminado" });
+    } catch (error){
+        console.log("Error al remover el inventario");
+        res.status(500).json({error:"Busca el error"})
+    }
+})
+
 
 //AGREGAR NUEVOS EQUIPOS AL INVENTARIO GENERAL
 app.post("/api/equipos-inventario", async (req, res) => {
@@ -107,6 +125,22 @@ app.post("/api/equipos-inventario", async (req, res) => {
         });
     }
 });
+
+app.delete("/api/equipos-inventario/:id/:numero_serie" , async (req,res) =>{
+    try{
+        const { id, numero_serie } = req.params;
+        await db
+        .delete(equiposInventario)
+        .where(
+            and(eq(equiposInventario.id, parseInt(id)), eq(equiposInventario.numero_serie, numero_serie))
+        );
+
+        res.status(200).json({ message: "Equipo Eliminado" });
+    } catch (error){
+        console.log("Error al eliminar el equipo");
+        res.status(500).json({error:"Busca el error"})
+    }
+})
 
 
 app.listen(5001, () => {

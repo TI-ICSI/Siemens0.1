@@ -3,11 +3,14 @@ import { ENV } from "./config/env.js";
 import {db} from './config/db.js'
 import {inventarioGeneral, equiposInventario} from "./db/schema.js"
 import { and, eq, sql } from 'drizzle-orm';
+import job from "./config/cron.js";
 
 const app = express();
 const PORT = ENV.PORT || 5001;
 
-app.use(express.json())
+if(ENV.NODE_ENV === "produccion") job.start();
+
+app.use(express.json());
 
 app.get("/api/health", (req,res) => {
     res.status(200).json({success: true})
